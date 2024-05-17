@@ -9,7 +9,7 @@ import (
 
 type AppConfig struct {
 	Environment string   `mapstructure:"environment"`
-	ServerPort  string   `mapstructure:"server_port"`
+	ServerPort  int      `mapstructure:"server_port"`
 	Logging     Logging  `mapstructure:"logging"`
 	Db          DbConfig `mapstructure:"db"`
 }
