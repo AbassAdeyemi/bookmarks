@@ -8,10 +8,10 @@ import (
 )
 
 type Bookmark struct {
-	ID        string
-	Title     string
-	Url       string
-	CreatedAt time.Time
+	ID        int       `json:"id"`
+	Title     string    `json:"title"`
+	Url       string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type BookmarkRepository interface {
@@ -62,7 +62,15 @@ func (r bookmarkRepo) GetByID(ctx context.Context, id int) (*Bookmark, error) {
 }
 
 func (r bookmarkRepo) Create(ctx context.Context, b Bookmark) (*Bookmark, error) {
-	panic("implement me")
+	query := "insert into bookmarks(title, url, created_at) values ($1, $2, $3) RETURNING id"
+	var lastInsertID int
+	err := r.db.QueryRow(ctx, query, b.Title, b.Url, b.CreatedAt).Scan(&lastInsertID)
+	if err != nil {
+		r.logger.Errorf("Error while inserting bookmark: %v", err)
+		return nil, err
+	}
+	b.ID = lastInsertID
+	return &b, nil
 }
 
 func (r bookmarkRepo) Update(ctx context.Context, b Bookmark) error {
