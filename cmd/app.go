@@ -24,6 +24,9 @@ func NewApp(cfg config.AppConfig) *App {
 	router := gin.Default()
 	router.GET("/api/bookmarks", handler.GetAll)
 	router.POST("/api/bookmarks", handler.Create)
+	router.GET("/api/bookmarks/:id", handler.GetByID)
+	router.PUT("/api/bookmarks/:id", handler.Update)
+	router.DELETE("/api/bookmarks/:id", handler.Delete)
 
 	return &App{
 		Router: router,

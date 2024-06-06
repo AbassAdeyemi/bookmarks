@@ -58,7 +58,16 @@ func (r bookmarkRepo) GetAll(ctx context.Context) ([]Bookmark, error) {
 }
 
 func (r bookmarkRepo) GetByID(ctx context.Context, id int) (*Bookmark, error) {
-	panic("implement me")
+	query := "SELECT id, title, url, created_at FROM bookmarks WHERE id=$1"
+	var bookmark = Bookmark{}
+	row := r.db.QueryRow(ctx, query, id)
+	err := row.Scan(&bookmark.ID, &bookmark.Title, &bookmark.Url, &bookmark.CreatedAt)
+	if err != nil {
+		r.logger.Errorf("Error fetching bookmark with id: %v", id)
+		return nil, err
+	}
+
+	return &bookmark, nil
 }
 
 func (r bookmarkRepo) Create(ctx context.Context, b Bookmark) (*Bookmark, error) {
@@ -74,9 +83,36 @@ func (r bookmarkRepo) Create(ctx context.Context, b Bookmark) (*Bookmark, error)
 }
 
 func (r bookmarkRepo) Update(ctx context.Context, b Bookmark) error {
-	panic("implement me")
+	existingBookmark, err := r.GetByID(ctx, b.ID)
+	if err != nil {
+		return err
+	}
+
+	if len(b.Title) != 0 {
+		existingBookmark.Title = b.Title
+	}
+	if len(b.Url) != 0 {
+		existingBookmark.Url = b.Url
+	}
+	query := "update bookmarks set title=$1, url=$2 where id=$3"
+
+	_, err = r.db.Exec(ctx, query, b.Title, b.Url, b.ID)
+
+	if err != nil {
+		r.logger.Errorf("Error updating bookmark with id: %v", b.ID)
+		return err
+	}
+
+	return nil
 }
 
 func (r bookmarkRepo) Delete(ctx context.Context, id int) error {
-	panic("implement me")
+	query := "delete from bookmarks where id=$1"
+
+	_, err := r.db.Exec(ctx, query, id)
+	if err != nil {
+		r.logger.Errorf("Error deleting bookmark with id: %v", id)
+		return err
+	}
+	return nil
 }
